@@ -47,10 +47,21 @@ content-type: application/json
 {"id":4,"title":"Buy milk","done":false}
 ```
 
+## Tests
+
+Unit tests cover every endpoint, status code (200/201/204/400/404), and validation rule.
+
+```bash
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
 ## Notes
 
 - Data is in-memory and resets on server restart.
-- Add your Swagger UI screenshot here for Stage 5 submission.
+- Swagger UI screenshot:
+
+![Swagger UI](docs/swagger-ui.png)
 
 ## Optional extras implemented
 
