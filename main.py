@@ -43,22 +43,22 @@ def clean_title(raw_title: str | None) -> str | None:
     return title
 
 
-@app.get('/')
+@app.get('/', summary='API metadata', description='Returns the API name, version, and top-level endpoints.')
 def root() -> dict:
     return {'name': 'Task API', 'version': '1.0', 'endpoints': ['/tasks']}
 
 
-@app.get('/health')
+@app.get('/health', summary='Health check', description='Returns an OK status so monitors can verify the server is running.')
 def health() -> dict:
     return {'status': 'ok'}
 
 
-@app.get('/tasks')
+@app.get('/tasks', summary='List tasks', description='Returns all tasks from in-memory storage.')
 def list_tasks() -> list[Task]:
     return tasks
 
 
-@app.get('/tasks/{task_id}')
+@app.get('/tasks/{task_id}', summary='Get one task', description='Returns one task by id or a 404 JSON error if it does not exist.')
 def get_task(task_id: int) -> Task:
     task = find_task(task_id)
     if task is None:
@@ -66,7 +66,7 @@ def get_task(task_id: int) -> Task:
     return task
 
 
-@app.post('/tasks', status_code=status.HTTP_201_CREATED)
+@app.post('/tasks', status_code=status.HTTP_201_CREATED, summary='Create task', description='Creates a task from title, sets done=false, and returns the created task.')
 def create_task(payload: CreateTaskRequest) -> Task:
     title = clean_title(payload.title)
     if title is None:
@@ -78,7 +78,7 @@ def create_task(payload: CreateTaskRequest) -> Task:
     return new_task
 
 
-@app.put('/tasks/{task_id}')
+@app.put('/tasks/{task_id}', summary='Update task', description='Updates title and/or done for an existing task.')
 def update_task(task_id: int, payload: UpdateTaskRequest) -> Task:
     task = find_task(task_id)
     if task is None:
@@ -101,7 +101,7 @@ def update_task(task_id: int, payload: UpdateTaskRequest) -> Task:
     return task
 
 
-@app.delete('/tasks/{task_id}', status_code=status.HTTP_204_NO_CONTENT)
+@app.delete('/tasks/{task_id}', status_code=status.HTTP_204_NO_CONTENT, summary='Delete task', description='Deletes a task by id.')
 def delete_task(task_id: int) -> Response:
     task = find_task(task_id)
     if task is None:
