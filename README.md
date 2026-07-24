@@ -27,6 +27,10 @@ Open:
 | POST | /tasks | Create task | 201 | 400 for missing/empty title |
 | PUT | /tasks/{id} | Update title and/or done | 200 | 400 for invalid body, 404 if id not found |
 | DELETE | /tasks/{id} | Delete task | 204 | 404 if id not found |
+| GET | /tasks?done=true | Filter tasks by completion | 200 | - |
+| GET | /tasks?search=milk | Search tasks by title substring | 200 | - |
+| GET | /stats | Task counts (total, done, open) | 200 | - |
+| POST | /reset | Reset to the 3 seed tasks | 200 | - |
 
 ## Example curl -i output
 
@@ -47,3 +51,10 @@ content-type: application/json
 
 - Data is in-memory and resets on server restart.
 - Add your Swagger UI screenshot here for Stage 5 submission.
+
+## Optional extras implemented
+
+- Query filtering with `done` (true/false)
+- Query search with `search` text
+- Stats endpoint at `/stats`
+- Reset endpoint at `/reset`

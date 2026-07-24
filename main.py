@@ -26,6 +26,8 @@ tasks: list[Task] = [
     Task(id=3, title='Test with Swagger UI', done=False),
 ]
 
+seed_tasks: list[Task] = [task.model_copy(deep=True) for task in tasks]
+
 
 def find_task(task_id: int) -> Task | None:
     for task in tasks:
@@ -53,9 +55,19 @@ def health() -> dict:
     return {'status': 'ok'}
 
 
-@app.get('/tasks', summary='List tasks', description='Returns all tasks from in-memory storage.')
-def list_tasks() -> list[Task]:
-    return tasks
+@app.get('/tasks', summary='List tasks', description='Returns all tasks from in-memory storage. Supports done and search filters.')
+def list_tasks(done: bool | None = None, search: str | None = None) -> list[Task]:
+    filtered = tasks
+
+    if done is not None:
+        filtered = [task for task in filtered if task.done == done]
+
+    if search is not None:
+        term = search.strip().lower()
+        if term:
+            filtered = [task for task in filtered if term in task.title.lower()]
+
+    return filtered
 
 
 @app.get('/tasks/{task_id}', summary='Get one task', description='Returns one task by id or a 404 JSON error if it does not exist.')
@@ -109,6 +121,20 @@ def delete_task(task_id: int) -> Response:
 
     tasks.remove(task)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.get('/stats', summary='Task stats', description='Returns aggregate counts for all, completed, and open tasks.')
+def task_stats() -> dict:
+    done_count = sum(1 for task in tasks if task.done)
+    total = len(tasks)
+    return {'total': total, 'done': done_count, 'open': total - done_count}
+
+
+@app.post('/reset', summary='Reset tasks', description='Restores the initial three example tasks in memory.')
+def reset_tasks() -> list[Task]:
+    tasks.clear()
+    tasks.extend(task.model_copy(deep=True) for task in seed_tasks)
+    return tasks
 
 
 @app.exception_handler(HTTPException)
