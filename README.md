@@ -1,6 +1,6 @@
 # Task API (FastAPI)
 
-Small CRUD API for a to-do list using in-memory storage (no database).
+Small CRUD API for a to-do list using SQLite persistence instead of in-memory storage.
 
 ## Run locally
 
@@ -58,7 +58,13 @@ pytest tests/ -v
 
 ## Notes
 
-- Data is in-memory and resets on server restart.
+- Data now lives in `tasks.db`, which is created automatically and survives restarts.
+- The database file is ignored by Git so each fresh clone starts clean.
+- Example SQL from the database stage:
+
+```sql
+SELECT * FROM tasks;
+```
 - Swagger UI screenshot:
 
 ![Swagger UI](docs/swagger-ui.png)

@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 .env
 W2 - Build your first CRUD API.pdf
+tasks.db

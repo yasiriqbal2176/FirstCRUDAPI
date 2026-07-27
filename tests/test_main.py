@@ -16,8 +16,7 @@ def client():
 
 @pytest.fixture(autouse=True)
 def reset_tasks():
-    main.tasks.clear()
-    main.tasks.extend(task.model_copy(deep=True) for task in main.seed_tasks)
+    main.reset_database()
     yield
 
 
@@ -98,7 +97,7 @@ class TestGetTask:
     def test_unknown_id_returns_404_with_json_error(self, client):
         response = client.get('/tasks/99')
         assert response.status_code == 404
-        assert response.json() == {'error': 'Task 99 not found'}
+        assert response.json() == {'error': 'Task not found'}
 
 
 class TestCreateTask:
@@ -167,7 +166,7 @@ class TestUpdateTask:
     def test_unknown_id_returns_404(self, client):
         response = client.put('/tasks/99', json={'title': 'x'})
         assert response.status_code == 404
-        assert response.json() == {'error': 'Task 99 not found'}
+        assert response.json() == {'error': 'Task not found'}
 
     def test_empty_body_returns_400(self, client):
         response = client.put('/tasks/1', json={})
@@ -199,7 +198,7 @@ class TestDeleteTask:
     def test_unknown_id_returns_404(self, client):
         response = client.delete('/tasks/99')
         assert response.status_code == 404
-        assert response.json() == {'error': 'Task 99 not found'}
+        assert response.json() == {'error': 'Task not found'}
 
 
 class TestFullCrudCycle:
