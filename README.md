@@ -65,7 +65,14 @@ pytest tests/ -v
 ```sql
 SELECT * FROM tasks;
 ```
-- Swagger UI screenshot:
+
+## Database Screenshot
+
+DB Browser for SQLite view of the seeded database:
+
+![DB Browser screenshot](docs/db-browser-screenshot.png)
+
+## Swagger Screenshot
 
 ![Swagger UI](docs/swagger-ui.png)
 
