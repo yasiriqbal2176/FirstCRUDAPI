@@ -2,6 +2,15 @@
 
 Small CRUD API for a to-do list using SQLite persistence instead of in-memory storage.
 
+## Why SQLite
+
+SQLite was chosen over a client/server database because it needs no separate install or
+process — the entire database is one file (`tasks.db`) that Python's built-in `sqlite3`
+module opens directly. For a small single-process API like this one, that means zero setup
+for anyone who clones the repo, and — unlike the in-memory list from Assignment 1 — the data
+now survives a server restart because it lives on disk instead of in a variable that gets
+wiped when the process exits.
+
 ## Run locally
 
 ```bash
@@ -49,22 +58,37 @@ content-type: application/json
 
 ## Tests
 
-Unit tests cover every endpoint, status code (200/201/204/400/404), and validation rule.
+Unit tests cover every endpoint, status code (200/201/204/400/404), and validation rule. These
+are the same tests written for the in-memory Assignment 1 API, run unchanged against this
+SQLite-backed version.
 
 ```bash
 pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
+All 40 tests pass without any modification to the test file itself. That's the proof that the
+storage swap worked: the tests only talk to the API (the promise), never to `tasks.db` (where
+the promise is kept), so identical tests passing before and after means the database is truly
+just an implementation detail behind an unchanged API.
+
 ## Notes
 
-- Data now lives in `tasks.db`, which is created automatically and survives restarts.
-- The database file is ignored by Git so each fresh clone starts clean.
-- Example SQL from the database stage:
+- Data now lives in `tasks.db`, which is created automatically (SQLite creates the file the
+  first time the app opens it) and survives restarts — the `tasks` table is created with
+  `CREATE TABLE IF NOT EXISTS` and seeded with 3 example tasks only when the table is empty,
+  so restarting never duplicates them.
+- The database file is ignored by Git (see `.gitignore`) so each fresh clone starts clean and
+  regenerates its own `tasks.db` on first run.
+- Example SQL from the database stage, run by hand in DB Browser for SQLite:
 
 ```sql
 SELECT * FROM tasks;
 ```
+
+This returned the 3 seeded rows (`Read assignment`, `Build API endpoints`,
+`Test with Swagger UI`, each with `done = 0`) — the exact same rows `GET /tasks` returns,
+confirming the API and DB Browser are reading the same file with no syncing involved.
 
 ## Database Screenshot
 
