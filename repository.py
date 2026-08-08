@@ -49,3 +49,25 @@ def get_task(task_id: int) -> dict | None:
             'SELECT id, title, done FROM tasks WHERE id = %s',
             (task_id,),
         ).fetchone()
+
+
+def create_task(title: str) -> dict:
+    with get_connection() as connection:
+        return connection.execute(
+            'INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING id, title, done',
+            (title, False),
+        ).fetchone()
+
+
+def update_task(task_id: int, title: str, done: bool) -> dict | None:
+    with get_connection() as connection:
+        return connection.execute(
+            'UPDATE tasks SET title = %s, done = %s WHERE id = %s RETURNING id, title, done',
+            (title, done, task_id),
+        ).fetchone()
+
+
+def delete_task(task_id: int) -> bool:
+    with get_connection() as connection:
+        cursor = connection.execute('DELETE FROM tasks WHERE id = %s', (task_id,))
+        return cursor.rowcount > 0
