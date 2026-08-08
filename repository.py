@@ -34,3 +34,18 @@ def init_db() -> None:
                 'INSERT INTO tasks (title, done) VALUES (%s, %s)',
                 SEED_TASKS,
             )
+
+
+def list_tasks() -> list[dict]:
+    with get_connection() as connection:
+        return connection.execute(
+            'SELECT id, title, done FROM tasks ORDER BY id'
+        ).fetchall()
+
+
+def get_task(task_id: int) -> dict | None:
+    with get_connection() as connection:
+        return connection.execute(
+            'SELECT id, title, done FROM tasks WHERE id = %s',
+            (task_id,),
+        ).fetchone()
