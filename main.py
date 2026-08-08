@@ -41,14 +41,18 @@ def root() -> dict:
     return {'name': 'Task API', 'version': '1.0', 'endpoints': ['/tasks']}
 
 
-@app.get('/health', summary='Health check', description='Returns an OK status so monitors can verify the server is running.')
-def health() -> dict:
-    return {'status': 'ok'}
+@app.get('/health', summary='Health check', description='Pings Postgres with SELECT 1 and reports db status. A load balancer can use this to stop routing traffic to an instance that has lost its database.')
+def health():
+    try:
+        repository.ping()
+        return {'status': 'ok', 'db': 'ok'}
+    except Exception:
+        return JSONResponse(status_code=503, content={'status': 'error', 'db': 'unreachable'})
 
 
-@app.get('/tasks', summary='List tasks', description='Returns all tasks from Postgres.')
-def list_tasks() -> list[Task]:
-    return [Task(**row) for row in repository.list_tasks()]
+@app.get('/tasks', summary='List tasks', description='Returns all tasks from Postgres. Supports done and search filters.')
+def list_tasks(done: bool | None = None, search: str | None = None) -> list[Task]:
+    return [Task(**row) for row in repository.list_tasks(done=done, search=search)]
 
 
 @app.get('/tasks/{task_id}', summary='Get one task', description='Returns one task by id or a 404 JSON error if it does not exist.')
@@ -103,6 +107,16 @@ def delete_task(task_id: int) -> Response:
     if not deleted:
         raise HTTPException(status_code=404, detail={'error': 'Task not found'})
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.get('/stats', summary='Task stats', description='Returns aggregate counts for all, completed, and open tasks from Postgres.')
+def task_stats() -> dict:
+    return repository.task_stats()
+
+
+@app.post('/reset', summary='Reset tasks', description='Restores the initial three example tasks in Postgres.')
+def reset_tasks() -> list[Task]:
+    return [Task(**row) for row in repository.reset_tasks()]
 
 
 @app.exception_handler(HTTPException)
